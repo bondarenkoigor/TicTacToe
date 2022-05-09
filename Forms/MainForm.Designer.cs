@@ -63,6 +63,7 @@ namespace TicTacToe
             Settings.Text = "Settings";
             Settings.Size = Statistics.Size;
             Settings.Location = new Point(Statistics.Location.X, Statistics.Location.Y + Statistics.Height + 10);
+            Settings.Click += Settings_Click;
             this.Controls.Add(Settings);
 
             //
@@ -76,6 +77,12 @@ namespace TicTacToe
             Exit.Size = Settings.Size;
             Exit.Click += Exit_Click;
             this.Controls.Add(Exit);
+        }
+
+        private void Settings_Click(object sender, System.EventArgs e)
+        {
+            SettingsForm tmp = new SettingsForm();
+            tmp.ShowDialog();
         }
 
         private void Exit_Click(object sender, System.EventArgs e)

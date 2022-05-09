@@ -35,6 +35,7 @@ namespace TicTacToe
             //this.ClientSize = new Size(800, 450);
             this.AutoSize = true;
             this.Text = FirstPlayer + " vs " + SecondPlayer;
+            ReadSettings();
             InitializeButtons();
         }
 
@@ -44,6 +45,23 @@ namespace TicTacToe
         private delegate string CrossOrCircle();
         private CrossOrCircle Symbol;
         private bool GameEnded = false;
+        private int GridWidth, GridHeight;
+
+        private void ReadSettings()
+        {
+            try
+            {
+                string str = File.ReadAllText("settings.txt");
+                GridWidth = int.Parse(str.Substring(0, str.IndexOf('x')));
+                GridHeight = int.Parse(str.Substring(str.IndexOf('x') + 1));
+                if (GridWidth < 3 || GridHeight < 3) throw new System.Exception();
+            }
+            catch
+            {
+                MessageBox.Show("Couldn't read settings\nSettings set to default", "error");
+                GridWidth = 3; GridHeight = 3;
+            }
+        }
 
         private string Cross()
         {
@@ -57,17 +75,17 @@ namespace TicTacToe
         }
         private void InitializeButtons()
         {
-            Buttons = new Button[3, 3];
+            Buttons = new Button[GridWidth, GridHeight];
             Symbol = Cross;
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < GridHeight; i++)
             {
-                for (int j = 0; j < 3; j++)
+                for (int j = 0; j < GridWidth; j++)
                 {
-                    Buttons[i, j] = new Button();
-                    Buttons[i, j].Size = new Size(100, 100);
-                    Buttons[i, j].Location = new Point(100 * j, 100 * i);
-                    Buttons[i, j].Click += Button_Click;
-                    this.Controls.Add(Buttons[i, j]);
+                    Buttons[j, i] = new Button();
+                    Buttons[j, i].Size = new Size(100, 100);
+                    Buttons[j, i].Location = new Point(100 * j, 100 * i);
+                    Buttons[j, i].Click += Button_Click;
+                    this.Controls.Add(Buttons[j, i]);
                 }
             }
         }
@@ -79,16 +97,15 @@ namespace TicTacToe
         }
         private string CheckForWin()
         {
-            for (int i = 0; i < 3; i++)
-            {
-                //check rows
-                if (Buttons[0, i].Text == Buttons[1, i].Text && Buttons[1, i].Text == Buttons[2, i].Text) return Buttons[0, i].Text;
-                //check columns
-                if (Buttons[i, 0].Text == Buttons[i, 1].Text && Buttons[i, 1].Text == Buttons[i, 2].Text) return Buttons[i, 0].Text;
-            }
+            //check rows
+            for (int i = 0; i < GridHeight; i++)
+                if (Button2DCheck.Row(Buttons, i)) return Buttons[i, 0].Text;
+            //check columns
+            for (int i = 0; i < GridWidth; i++)
+                if (Button2DCheck.Column(Buttons, i)) return Buttons[0, i].Text;
             //check diagonals
-            if (Buttons[0, 0].Text == Buttons[1, 1].Text && Buttons[1, 1].Text == Buttons[2, 2].Text) return Buttons[0, 0].Text;
-            if (Buttons[0, 2].Text == Buttons[1, 1].Text && Buttons[1, 1].Text == Buttons[2, 0].Text) return Buttons[0, 2].Text;
+            if (Button2DCheck.MainDiag(Buttons)) return Buttons[0, 0].Text;
+            if (Button2DCheck.SecondDiag(Buttons)) return Buttons[Buttons.Length - 1, 0].Text;
             //draw
             if (Buttons.Cast<Button>().All<Button>(button => button.Text != "")) return "draw";
 
@@ -102,8 +119,8 @@ namespace TicTacToe
             Button button = new Button();
             button.Text = str;
             if (str != "draw") button.Text += " - winner";
-            button.Size = new Size(Buttons[0, 0].Width * 3, Buttons[0, 0].Height);
-            button.Location = new Point(Buttons[0, 0].Location.X, Buttons[0, 0].Height * 3);
+            button.Size = new Size(Buttons[0, 0].Width * GridWidth, Buttons[0, 0].Height);
+            button.Location = new Point(Buttons[0, 0].Location.X, Buttons[0, 0].Height * GridWidth);
             this.Controls.Add(button);
             LogResult(this.Text + ": " + button.Text);
             GameEnded = true;
