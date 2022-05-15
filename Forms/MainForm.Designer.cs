@@ -1,6 +1,6 @@
 ﻿using System.Windows.Forms;
 using System.Drawing;
-
+using System.IO;
 
 namespace TicTacToe
 {
@@ -29,11 +29,14 @@ namespace TicTacToe
         /// </summary>
         private void InitializeComponent()
         {
+            //CustomSizeForm customSizeForm = new CustomSizeForm();
+            //customSizeForm.ShowDialog();
             this.components = new System.ComponentModel.Container();
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             //this.ClientSize = new System.Drawing.Size(250, 450);
             this.AutoSize = true;
             this.Text = "Main menu";
+            this.UpdateBackground();
             //
             // StartGame
             //
@@ -79,10 +82,23 @@ namespace TicTacToe
             this.Controls.Add(Exit);
         }
 
+        private void UpdateBackground()
+        {
+            if (!File.Exists("settings.txt") || File.ReadAllLines("settings.txt").Length <= 1) return;
+
+            string[] str = File.ReadAllLines("settings.txt")[1].Split('|');
+            int red = int.Parse(str[0]),
+                green = int.Parse(str[1]),
+                blue = int.Parse(str[2]);
+
+            this.BackColor = Color.FromArgb(red, green, blue);
+        }
+
         private void Settings_Click(object sender, System.EventArgs e)
         {
             SettingsForm tmp = new SettingsForm();
             tmp.ShowDialog();
+            this.UpdateBackground();
         }
 
         private void Exit_Click(object sender, System.EventArgs e)
@@ -98,32 +114,44 @@ namespace TicTacToe
 
         private void StartGame_Click(object sender, System.EventArgs e)
         {
-            StartGame.Size = new Size(StartGame.Width, StartGame.Height / 2);
-            StartGame.Text = "CONFIRM";
-            StartGame.Click -= StartGame_Click;
-            StartGame.Click += ConfirmGame_Click;
+            this.Controls.Remove(this.StartGame);
+
             //Start Game Menu
+            ConfirmButton = new Button();
+            ConfirmButton.Location = StartGame.Location;
+            ConfirmButton.Size = new Size(StartGame.Width, StartGame.Height / 2);
+            ConfirmButton.Text = "CONFIRM";
+            ConfirmButton.Click += ConfirmGame_Click;
+            this.Controls.Add(ConfirmButton);
+
             UserText1 = new TextBox();
-            UserText1.Location = new Point(StartGame.Location.X - StartGame.Width / 2 - StartGame.Width / 4, StartGame.Location.Y + StartGame.Height);
+            UserText1.Location = new Point(ConfirmButton.Location.X - ConfirmButton.Width / 2 - ConfirmButton.Width / 4, ConfirmButton.Location.Y + ConfirmButton.Height);
             UserText2 = new TextBox();
-            UserText2.Location = new Point(StartGame.Location.X + StartGame.Width / 2 + StartGame.Width / 4, StartGame.Location.Y + StartGame.Height);
+            UserText2.Location = new Point(ConfirmButton.Location.X + ConfirmButton.Width / 2 + ConfirmButton.Width / 4, ConfirmButton.Location.Y + ConfirmButton.Height);
             this.Controls.Add(UserText1);
             this.Controls.Add(UserText2);
 
             VSLabel = new Label();
             VSLabel.Text = "VS";
-            VSLabel.Location = new Point(UserText1.Location.X + UserText1.Width + StartGame.Width / 8, UserText1.Location.Y);
-            VSLabel.Size = new Size(StartGame.Width / 4, StartGame.Height);
+            VSLabel.Location = new Point(UserText1.Location.X + UserText1.Width + ConfirmButton.Width / 8, UserText1.Location.Y);
+            VSLabel.Size = new Size(ConfirmButton.Width / 4, ConfirmButton.Height);
             this.Controls.Add(VSLabel);
         }
 
         private void ConfirmGame_Click(object sender, System.EventArgs e)
         {
+            this.Controls.Remove(ConfirmButton);
+            this.Controls.Remove(UserText1);
+            this.Controls.Remove(UserText2);
+            this.Controls.Remove(VSLabel);
+            this.Controls.Add(StartGame);
+
             GameForm tmp = new GameForm(UserText1.Text, UserText2.Text);
             tmp.ShowDialog();
         }
 
         Button StartGame;
+        Button ConfirmButton;
         private TextBox UserText1;
         private Label VSLabel;
         private TextBox UserText2;

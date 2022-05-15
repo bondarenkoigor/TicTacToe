@@ -51,7 +51,7 @@ namespace TicTacToe
         {
             try
             {
-                string str = File.ReadAllText("settings.txt");
+                string str = File.ReadAllLines("settings.txt")[0];
                 GridWidth = int.Parse(str.Substring(0, str.IndexOf('x')));
                 GridHeight = int.Parse(str.Substring(str.IndexOf('x') + 1));
                 if (GridWidth < 3 || GridHeight < 3) throw new System.Exception();
@@ -61,6 +61,18 @@ namespace TicTacToe
                 MessageBox.Show("Couldn't read settings\nSettings set to default", "error");
                 GridWidth = 3; GridHeight = 3;
             }
+            this.UpdateBackground();
+        }
+        private void UpdateBackground()
+        {
+            if (!File.Exists("settings.txt") || File.ReadAllLines("settings.txt").Length <= 1) return;
+
+            string[] str = File.ReadAllLines("settings.txt")[1].Split('|');
+            int red = int.Parse(str[0]),
+                green = int.Parse(str[1]),
+                blue = int.Parse(str[2]);
+
+            this.BackColor = Color.FromArgb(red, green, blue);
         }
 
         private string Cross()

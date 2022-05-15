@@ -47,7 +47,18 @@ namespace TicTacToe
             this.Stats.AutoSize = true;
             this.Controls.Add(this.Stats);
             this.ClientSize = this.Stats.Size;
-            
+            this.UpdateBackground();
+        }
+        private void UpdateBackground()
+        {
+            if (!File.Exists("settings.txt") || File.ReadAllLines("settings.txt").Length <= 1) return;
+
+            string[] str = File.ReadAllLines("settings.txt")[1].Split('|');
+            int red = int.Parse(str[0]),
+                green = int.Parse(str[1]),
+                blue = int.Parse(str[2]);
+
+            this.BackColor = System.Drawing.Color.FromArgb(red, green, blue);
         }
 
         System.Windows.Forms.Label Stats;
